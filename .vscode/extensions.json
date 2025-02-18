@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "amazonwebservices.aws-toolkit-vscode",
+        "vscode-aws-console.vscode-aws-console",
+        "github.copilot",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker"
+    ]
+}
