@@ -16,8 +16,8 @@ Here’s the information in a table format:
 | 4   | Financial Modeling Prep | <https://site.financialmodelingprep.com/developer/docs/dashboard> |
 | 5   | EOD Historical Data     | <https://eodhd.com/cp/dashboard>                                  |
 
-This should make it easier to read and use. 🚀
 5. Create `.env` from `.env.example` and fill in the keys/tokens
+
 6. Run `sources.py` or `normalise.py`
 
 ## Docker 🐋
