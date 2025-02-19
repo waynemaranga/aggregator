@@ -4,6 +4,11 @@ from datetime import datetime
 import requests
 from typing import Any, Optional
 import random
+import boto3
+
+# AWS SDK
+sqs = boto3.client("sqs")
+SQS_QUEUE_URL: Optional[str] = os.environ.get("AWS_SQS_QUEUE_URL")
 
 # Default Values
 TODAY: str = datetime.today().strftime("%Y-%m-%d")
@@ -94,17 +99,9 @@ def lambda_handler(event, context):
         # Get symbol from event or use default
         symbol = event.get("symbol", "AAPL")
 
-        # Fetch data
         results: dict[str, Any] = fetch_financial_data(symbol=symbol)
-
-        # You might want to store this in S3 or another database
-        # For now, we'll just return it
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {"timestamp": str(datetime.now()), "symbol": symbol, "data": results}
-            ),
-        }
+        sqs.send_message(QueueUrl=SQS_QUEUE_URL, MessageBody=json.dumps(results))
+        return {"statusCode": 200,"body": f"Sent to SQS at {datetime.now().isoformat()}"}
 
     except Exception as e:
         print(f"Check failed: {str(e)}")
