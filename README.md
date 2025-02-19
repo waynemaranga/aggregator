@@ -5,8 +5,7 @@
 1. `python3 -m venv .venv`
 2. `source .venv/bin/activate`
 3. `pip install -r requirements.txt`
-4. Get API keys/tokens:
-Here’s the information in a table format:  
+4. Get API keys/tokens:  
 
 | #   | Service                 | Link                                                              |
 | --- | ----------------------- | ----------------------------------------------------------------- |
