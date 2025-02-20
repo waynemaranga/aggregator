@@ -7,15 +7,14 @@ import random
 import boto3
 
 # AWS SDK
-sqs = boto3.client("sqs")
-SQS_QUEUE_URL: Optional[str] = os.environ.get("AWS_SQS_QUEUE_URL")
+sns = boto3.client("sns")
+SNS_TOPIC_ARN: Optional[str] = os.environ.get("AWS_SNS_TOPIC_ARN")
 
 # Default Values
 TODAY: str = datetime.today().strftime("%Y-%m-%d")
 DEFAULT_DATE: str = TODAY
 TICKERS: list[str] = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA"]
 DEFAULT_TICKER: str = random.choice(TICKERS)
-# DEFAULT_TICKER: str = "MSFT"
 
 
 def get_api_keys() -> dict[str, Optional[str]]:
@@ -29,7 +28,9 @@ def get_api_keys() -> dict[str, Optional[str]]:
     }
 
 
-def fetch_financial_data(api_keys: dict[str, Optional[str]] = get_api_keys(), symbol: str = DEFAULT_TICKER) -> dict[str, Any]:
+def fetch_financial_data(
+    api_keys: dict[str, Optional[str]] = get_api_keys(), symbol: str = DEFAULT_TICKER
+) -> dict[str, Any]:
     """Fetch financial data from multiple sources"""
     results = {}
     api_keys = get_api_keys()
@@ -93,15 +94,26 @@ def fetch_financial_data(api_keys: dict[str, Optional[str]] = get_api_keys(), sy
 
 
 def lambda_handler(event, context):
-    print(f"Starting financial data check at {event.get('time', datetime.now())}...")
+    print(f"🛫 Starting financial data check at {event.get('time', datetime.now())}...")
 
     try:
         # Get symbol from event or use default
-        symbol = event.get("symbol", "AAPL")
+        symbol = event.get("symbol", DEFAULT_TICKER)
+        message = {
+            "timestamp": datetime.now().isoformat(),
+            "event_id": context.aws_request_id,
+            "data": fetch_financial_data(symbol=symbol),
+        }
+        sns_response = sns.publish(  # noqa: F841
+            TopicArn=SNS_TOPIC_ARN,
+            Message=json.dumps(message),
+            Subject=f"Financial Data Check for {symbol}",
+        )
 
-        results: dict[str, Any] = fetch_financial_data(symbol=symbol)
-        sqs.send_message(QueueUrl=SQS_QUEUE_URL, MessageBody=json.dumps(results))
-        return {"statusCode": 200,"body": f"Sent to SQS at {datetime.now().isoformat()}"}
+        return {
+            "statusCode": 200,
+            "body": f"Sent data for {DEFAULT_TICKER} from {TODAY} to SNS at {datetime.now().isoformat()}",
+        }
 
     except Exception as e:
         print(f"Check failed: {str(e)}")

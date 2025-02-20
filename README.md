@@ -47,3 +47,6 @@
    - Define access policy with IAM/etc on basic or json
    - (Optional) dead letter queue, tags, redrive allow policy
    - redo the queue with sufficient lambda/sql integration IAM and test
+4. Creating SNS Topic
+   - Standard topic (!= FIFO)
+   - In SQS, make your queue subscribe to that topic
